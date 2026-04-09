@@ -1,0 +1,7 @@
+transaction_id,event_timestamp,customer_id,product_id,product_category,quantity,unit_price,payment_method,order_status,shipping_country,customer_email,is_returning_customer,total_amount
+1066070b-41b1-6889-39a6-3f14eb7cdeb7,2025-03-05 05:37:04.672866+00:00,65437,89,electronics,8,470.93,debit_card,completed,US,user38882@example.com,False,3767.44
+63a21207-d6c6-0cd8-18e9-ebd261446288,2025-03-07 21:43:14.449372+00:00,46613,126,books,2,999.99,debit_card,completed,IE,user89839@example.com,False,1999.98
+5f545dc7-7615-646a-7bd7-5be1aeee2585,2025-03-08 05:30:51.553866+00:00,12296,392,sports,4,608.86,paypal,completed,FR,user20450@sample.org,True,2435.44
+3abdc08b-c71f-708a-48cc-82f240b7b4a4,2025-03-15 01:38:39.686371+00:00,16247,134,sports,6,578.75,debit_card,completed,GB,user25518@sample.org,False,3472.5
+513e732d-498c-8363-46db-b096c85e2733,2025-03-16 08:37:41.585618+00:00,97065,86,clothing,1,744.14,paypal,completed,FR,user5538@example.com,True,744.14
+3984ad7d-e4fe-2ac2-22d8-cfbe5e5361a4,2025-03-24 22:19:18.122737+00:00,79574,124,books,10,663.95,debit_card,cancelled,GB,user19951@sample.org,True,6639.5

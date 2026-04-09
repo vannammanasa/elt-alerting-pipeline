@@ -1,0 +1,139 @@
+# =============================================================================
+# Failure Injection Scenarios (AI-9)
+# =============================================================================
+# Each scenario defines a sequence of failures to inject during one
+# experimental run.  The experiment runner (Phase 6, AI-14) iterates
+# through these scenarios, executing each under both the baseline and
+# smart alerting strategies.
+#
+# Severity expectations serve as ground truth for post-execution
+# validation (Phase 7, AI-16b).
+# =============================================================================
+
+# ── Scenario 1: Critical null injection on primary key ───────────────────
+scenario_1_null_pk:
+  name: "Primary key null injection"
+  description: "Sets transaction_id to NULL on 50 rows — must trigger CRITICAL alert"
+  failures:
+    - type: null_pk
+      table: raw_transactions
+      column: transaction_id
+      row_count: 50
+      expected_severity: critical
+
+# ── Scenario 2: Warning null injection on optional column ────────────────
+scenario_2_null_minor:
+  name: "Non-essential null injection"
+  description: "Sets shipping_country to NULL on 500 rows — WARNING only"
+  failures:
+    - type: null_minor
+      table: raw_transactions
+      column: shipping_country
+      row_count: 500
+      expected_severity: warning
+
+# ── Scenario 3: Schema drift — unexpected column added ───────────────────
+scenario_3_schema_add:
+  name: "Schema drift — column addition"
+  description: "Adds unexpected_column to raw_transactions — CRITICAL"
+  failures:
+    - type: schema_drift
+      table: raw_transactions
+      column: unexpected_column
+      drift_action: add
+      expected_severity: critical
+
+# ── Scenario 4: Schema drift — column dropped ────────────────────────────
+scenario_4_schema_drop:
+  name: "Schema drift — column removal"
+  description: "Drops shipping_country from raw_transactions — CRITICAL"
+  failures:
+    - type: schema_drift
+      table: raw_transactions
+      column: shipping_country
+      drift_action: drop
+      expected_severity: critical
+
+# ── Scenario 5: Volume anomaly — 60% row deletion ────────────────────────
+scenario_5_volume_drop:
+  name: "Volume anomaly"
+  description: "Deletes 60% of rows from raw_transactions — CRITICAL"
+  failures:
+    - type: volume_anomaly
+      table: raw_transactions
+      drop_percentage: 60
+      expected_severity: critical
+
+# ── Scenario 6: Freshness delay — 48 hour backdate ──────────────────────
+scenario_6_freshness:
+  name: "Data freshness delay"
+  description: "Backdates _ingestion_timestamp by 48 hours — WARNING"
+  failures:
+    - type: freshness_delay
+      table: raw_transactions
+      delay_hours: 48
+      expected_severity: warning
+
+# ── Scenario 7: Duplicate injection ──────────────────────────────────────
+scenario_7_duplicates:
+  name: "Duplicate record injection"
+  description: "Inserts 200 duplicate rows into raw_transactions — WARNING"
+  failures:
+    - type: duplicate
+      table: raw_transactions
+      row_count: 200
+      expected_severity: warning
+
+# ── Scenario 8: Mixed — multiple failures in one run ─────────────────────
+scenario_8_mixed_critical:
+  name: "Mixed failures — critical dominant"
+  description: "Combines null PK + volume drop to test compound detection"
+  failures:
+    - type: null_pk
+      table: raw_transactions
+      column: transaction_id
+      row_count: 30
+      expected_severity: critical
+    - type: volume_anomaly
+      table: raw_transactions
+      drop_percentage: 55
+      expected_severity: critical
+
+# ── Scenario 9: Mixed — warnings only ────────────────────────────────────
+scenario_9_mixed_warning:
+  name: "Mixed failures — warnings only"
+  description: "Combines minor nulls + duplicates + freshness delay"
+  failures:
+    - type: null_minor
+      table: raw_transactions
+      column: customer_email
+      row_count: 300
+      expected_severity: warning
+    - type: duplicate
+      table: raw_transactions
+      row_count: 100
+      expected_severity: warning
+    - type: freshness_delay
+      table: raw_transactions
+      delay_hours: 36
+      expected_severity: warning
+
+# ── Scenario 10: Mixed — critical + warning ──────────────────────────────
+scenario_10_mixed_both:
+  name: "Mixed failures — critical and warning"
+  description: "Null PK (critical) + minor nulls (warning) + duplicates (warning)"
+  failures:
+    - type: null_pk
+      table: raw_transactions
+      column: transaction_id
+      row_count: 25
+      expected_severity: critical
+    - type: null_minor
+      table: raw_transactions
+      column: shipping_country
+      row_count: 400
+      expected_severity: warning
+    - type: duplicate
+      table: raw_transactions
+      row_count: 150
+      expected_severity: warning

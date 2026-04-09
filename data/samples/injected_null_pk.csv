@@ -1,0 +1,6 @@
+transaction_id,event_timestamp,customer_id,product_id,product_category,quantity,unit_price,payment_method,order_status,shipping_country,customer_email,is_returning_customer,total_amount
+,2025-05-10 15:52:13.876051+00:00,50084,267,electronics,9,82.83,credit_card,completed,IT,user1311@test.co.uk,True,745.47
+,2025-04-12 08:07:40.184525+00:00,24218,1,electronics,7,623.1,bank_transfer,completed,IE,user45636@example.com,True,4361.7
+,2025-04-29 09:11:29.734921+00:00,34850,460,home,4,999.99,credit_card,pending,US,user75892@test.co.uk,True,3999.96
+,2025-03-10 04:54:23.229633+00:00,73508,220,clothing,8,708.15,debit_card,completed,GB,user87251@test.co.uk,True,5665.2
+,2025-04-11 00:57:45.716460+00:00,90873,82,clothing,8,999.99,credit_card,completed,GB,user54688@example.com,False,7999.92

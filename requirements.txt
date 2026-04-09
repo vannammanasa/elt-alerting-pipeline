@@ -1,0 +1,47 @@
+# =============================================================================
+# requirements.txt — Python Dependencies
+# Project: An Empirical Evaluation of Severity-Based Alerting in ELT Pipelines
+# =============================================================================
+
+# ── Core Pipeline & Data Engineering ─────────────────────────────────────────
+psycopg2-binary==2.9.9          # PostgreSQL adapter for Python
+sqlalchemy>=1.4.36,<2.0         # SQL toolkit and ORM (connection management)
+pandas==2.1.4                   # Data manipulation and analysis
+requests==2.32.3                # HTTP client for API-based data extraction
+
+# ── dbt (Data Build Tool) — Transformation & Quality Validation ──────────────
+dbt-core==1.9.1                 # dbt core framework
+dbt-postgres==1.9.1             # dbt PostgreSQL adapter
+
+# ── Apache Airflow — Pipeline Orchestration & Scheduling ─────────────────────
+apache-airflow==2.10.4          # Workflow orchestration platform
+apache-airflow-providers-postgres==5.13.1   # Airflow PostgreSQL provider
+apache-airflow-providers-smtp==2.0.0        # Airflow SMTP provider (email alerts)
+
+# ── Alerting & Notification ──────────────────────────────────────────────────
+secure-smtplib==0.1.1           # Secure SMTP wrapper (TLS/SSL)
+
+# ── Statistical Analysis & Visualisation ─────────────────────────────────────
+scipy==1.14.1                   # Statistical tests (Mann-Whitney U, etc.)
+numpy==1.26.4                   # Numerical computing
+matplotlib==3.9.3               # Plotting and chart generation
+seaborn==0.13.2                 # Statistical data visualisation
+
+# ── Structured Logging & Observability ───────────────────────────────────────
+python-json-logger==2.0.7       # JSON-formatted structured logging
+structlog==24.4.0               # Structured logging library
+
+# ── Configuration & Environment ──────────────────────────────────────────────
+python-dotenv==1.0.1            # .env file loading
+pyyaml==6.0.2                   # YAML configuration parsing
+click==8.1.7                    # CLI framework
+
+# ── Testing & Quality ────────────────────────────────────────────────────────
+pytest==8.3.4                   # Test framework
+pytest-cov==6.0.0               # Coverage reporting
+great-expectations==1.3.0       # Data quality validation (supplementary)
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+croniter==5.0.1                 # Cron expression parser (for scheduling logic)
+tabulate==0.9.0                 # Table formatting for CLI reports
+jinja2==3.1.4                   # Templating (used by dbt and report generation)

@@ -1,0 +1,198 @@
+# =============================================================================
+# Mart Model Schema Documentation (AI-5a)
+# =============================================================================
+# Final analytical tables materialised in the 'transformed' schema.
+# These are the tables consumed by downstream analytics and the
+# experiment metrics calculator (Phase 7, AI-15).
+# =============================================================================
+
+version: 2
+
+models:
+  - name: mart_transactions
+    description: >
+      Final fact table of all enriched transactions.  Materialised as a
+      TABLE in the transformed schema.  Metadata columns (_ingestion_*,
+      _source_id, _batch_id) are excluded — only business columns are
+      exposed.  This is the primary analytical table.
+    tests:
+      # AI-7: Row count must not drop below threshold
+      - row_count_threshold:
+          min_count: 1000
+          config:
+            severity: error
+    columns:
+      - name: transaction_id
+        description: "Primary key (UUID)."
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - unique:
+              config:
+                severity: error
+      - name: event_timestamp
+        description: "Transaction creation time (UTC)."
+        tests:
+          - not_null:
+              config:
+                severity: error
+      - name: transaction_date
+        description: "Derived: date portion of event_timestamp."
+        tests:
+          - not_null:
+              config:
+                severity: error
+      - name: customer_id
+        description: "Customer account number."
+        tests:
+          - not_null:
+              config:
+                severity: error
+      - name: customer_email
+        description: "Customer email (nullable)."
+      - name: is_returning_customer
+        description: "Returning customer flag."
+      - name: product_id
+        description: "Product catalogue ID."
+        tests:
+          - not_null:
+              config:
+                severity: error
+      - name: product_category
+        description: "Product department."
+        tests:
+          - accepted_values:
+              values: ['electronics', 'clothing', 'home', 'sports', 'books']
+              config:
+                severity: error
+      - name: quantity
+        description: "Units purchased."
+      - name: unit_price
+        description: "Unit price in GBP."
+      - name: total_amount
+        description: "Line total."
+      - name: revenue_band
+        description: "low / medium / high / premium."
+        tests:
+          - accepted_values:
+              values: ['low', 'medium', 'high', 'premium']
+              config:
+                severity: warn
+      - name: is_high_value
+        description: "True if total_amount > £100."
+      - name: payment_method
+        description: "Payment instrument."
+        tests:
+          - accepted_values:
+              values: ['credit_card', 'debit_card', 'paypal', 'bank_transfer']
+              config:
+                severity: error
+      - name: order_status
+        description: "Order state."
+        tests:
+          - accepted_values:
+              values: ['completed', 'pending', 'shipped', 'cancelled', 'refunded']
+              config:
+                severity: error
+      - name: is_completed
+        description: "True if completed."
+      - name: shipping_country
+        description: "ISO country code (nullable)."
+      - name: is_domestic
+        description: "True if GB."
+
+  - name: mart_daily_summary
+    description: >
+      Daily aggregated summary with 7-day moving averages for revenue
+      and volume.  Used for trend analysis and as the target for
+      row count threshold quality tests.
+    columns:
+      - name: sale_date
+        description: "Calendar date (primary key)."
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - unique:
+              config:
+                severity: error
+      - name: transaction_count
+        description: "Total transactions."
+        tests:
+          - not_null:
+              config:
+                severity: error
+      - name: unique_customers
+        description: "Distinct customers."
+      - name: total_units_sold
+        description: "Sum of quantity."
+      - name: daily_revenue
+        description: "Sum of total_amount."
+      - name: avg_order_value
+        description: "Mean order value."
+      - name: min_order_value
+        description: "Smallest order."
+      - name: max_order_value
+        description: "Largest order."
+      - name: completed_orders
+        description: "Completed order count."
+      - name: cancelled_orders
+        description: "Cancelled order count."
+      - name: high_value_orders
+        description: "High-value order count."
+      - name: returning_customer_orders
+        description: "Orders from returning customers."
+      - name: top_category
+        description: "Most frequent product category."
+      - name: shipping_country_null_rate
+        description: "Null rate for shipping_country."
+      - name: revenue_7d_moving_avg
+        description: "7-day rolling average of daily_revenue."
+      - name: volume_7d_moving_avg
+        description: "7-day rolling average of transaction_count."
+
+  - name: mart_customer_summary
+    description: >
+      Customer-level lifetime aggregation.  One row per customer_id
+      with order counts, revenue totals, and behavioural flags.
+    columns:
+      - name: customer_id
+        description: "Primary key — customer account number."
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - unique:
+              config:
+                severity: error
+      - name: total_orders
+        description: "Lifetime order count."
+      - name: active_days
+        description: "Distinct days with at least one order."
+      - name: first_order_at
+        description: "Timestamp of first order."
+      - name: last_order_at
+        description: "Timestamp of most recent order."
+      - name: lifetime_revenue
+        description: "Sum of all total_amount values."
+      - name: avg_order_value
+        description: "Mean order value."
+      - name: max_order_value
+        description: "Largest single order."
+      - name: total_units
+        description: "Lifetime units purchased."
+      - name: is_returning
+        description: "True if flagged as returning customer."
+      - name: completed_orders
+        description: "Count of completed orders."
+      - name: cancelled_orders
+        description: "Count of cancelled orders."
+      - name: high_value_orders
+        description: "Count of orders > £100."
+      - name: preferred_category
+        description: "Most frequently ordered product category."
+      - name: preferred_payment
+        description: "Most frequently used payment method."
+      - name: primary_country
+        description: "Most frequent shipping destination."

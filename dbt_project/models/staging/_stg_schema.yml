@@ -1,0 +1,206 @@
+# =============================================================================
+# Staging Model Schema Documentation (AI-5a)
+# =============================================================================
+# Column-level documentation and test hooks for the staging layer.
+# Quality tests (Phase 3) will be added directly to this file.
+# =============================================================================
+
+version: 2
+
+models:
+  - name: stg_transactions
+    description: >
+      Cleaned and deduplicated transaction records from the raw landing
+      zone.  Type-casting, trimming, and case normalisation are applied.
+      Exact duplicates (same transaction_id) are resolved by keeping the
+      most recently ingested record.
+    tests:
+      # AI-7: Row count threshold — CRITICAL if volume drops >50%
+      - row_count_threshold:
+          min_count: 1000
+          config:
+            severity: error
+      # AI-7: Schema drift detection — CRITICAL if expected columns missing
+      - schema_has_columns:
+          expected_columns:
+            - transaction_id
+            - event_timestamp
+            - customer_id
+            - product_id
+            - product_category
+            - quantity
+            - unit_price
+            - total_amount
+            - payment_method
+            - order_status
+          config:
+            severity: error
+      # AI-7: Data freshness — WARNING if data older than 24h
+      - freshness_hours:
+          timestamp_column: _ingestion_timestamp
+          max_hours: 24
+          config:
+            severity: warn
+    columns:
+      # ── PRIMARY KEY: CRITICAL severity (AI-7a) ────────────────────
+      - name: transaction_id
+        description: "Unique transaction identifier (UUID). Primary key."
+        tests:
+          - not_null:
+              config:
+                severity: error          # CRITICAL → email alert
+          - unique:
+              config:
+                severity: error          # CRITICAL → email alert
+
+      # ── REQUIRED TIMESTAMPS: CRITICAL ──────────────────────────
+      - name: event_timestamp
+        description: "Transaction creation time, cast to TIMESTAMP WITH TIME ZONE."
+        tests:
+          - not_null:
+              config:
+                severity: error          # CRITICAL → email alert
+
+      # ── REQUIRED BUSINESS COLUMNS: CRITICAL ────────────────────
+      - name: customer_id
+        description: "Customer account number, cast to INTEGER."
+        tests:
+          - not_null:
+              config:
+                severity: error          # CRITICAL → email alert
+
+      # ── NULLABLE COLUMNS: WARNING severity (AI-7a) ─────────────
+      - name: customer_email
+        description: "Lowercase trimmed customer email (nullable)."
+        tests:
+          - not_null:
+              config:
+                severity: warn           # WARNING → log only
+                warn_if: ">10"
+                error_if: ">50"
+
+      - name: is_returning_customer
+        description: "Whether the customer has prior orders (boolean)."
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - accepted_values:
+              values: [true, false]
+              config:
+                severity: warn
+
+      # ── REQUIRED BUSINESS COLUMNS: CRITICAL ────────────────────
+      - name: product_id
+        description: "Product catalogue identifier, cast to INTEGER."
+        tests:
+          - not_null:
+              config:
+                severity: error
+
+      - name: product_category
+        description: "Lowercase product department name."
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - accepted_values:
+              values: ['electronics', 'clothing', 'home', 'sports', 'books']
+              config:
+                severity: error          # CRITICAL: unknown category = schema drift
+
+      - name: quantity
+        description: "Units purchased, cast to INTEGER."
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - value_in_range:
+              min_val: 1
+              max_val: 10
+              config:
+                severity: warn
+
+      - name: unit_price
+        description: "Price per unit in GBP, rounded to 2 decimal places."
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - value_in_range:
+              min_val: 0.01
+              max_val: 9999.99
+              config:
+                severity: warn
+
+      - name: total_amount
+        description: "Line total (quantity × unit_price), rounded to 2dp."
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - value_in_range:
+              min_val: 0.01
+              max_val: 99999.99
+              config:
+                severity: warn
+
+      - name: payment_method
+        description: "Lowercase payment instrument name."
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - accepted_values:
+              values: ['credit_card', 'debit_card', 'paypal', 'bank_transfer']
+              config:
+                severity: error
+
+      - name: order_status
+        description: "Lowercase order state."
+        tests:
+          - not_null:
+              config:
+                severity: error
+          - accepted_values:
+              values: ['completed', 'pending', 'shipped', 'cancelled', 'refunded']
+              config:
+                severity: error
+
+      # ── NULLABLE NON-ESSENTIAL: WARNING ─────────────────────────
+      - name: shipping_country
+        description: "Uppercase ISO country code (nullable)."
+        tests:
+          - not_null:
+              config:
+                severity: warn           # WARNING → log only
+                warn_if: ">10"
+                error_if: ">50"
+          - accepted_values:
+              values: ['GB', 'US', 'DE', 'FR', 'IE', 'NL', 'ES', 'IT']
+              config:
+                severity: warn
+          - null_rate_below:
+              max_null_rate: 0.10
+              config:
+                severity: warn
+
+      # ── METADATA: WARNING ──────────────────────────────────────
+      - name: _ingestion_timestamp
+        description: "Metadata: UTC load timestamp from Phase 1 RawLoader."
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: _source_id
+        description: "Metadata: data source identifier."
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: _batch_id
+        description: "Metadata: unique batch identifier for the load run."
+        tests:
+          - not_null:
+              config:
+                severity: warn

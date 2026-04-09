@@ -1,0 +1,24 @@
+# =============================================================================
+# .dockerignore — Excluded from Docker Build Context
+# =============================================================================
+.git
+.gitignore
+.env
+*.md
+LICENSE
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.mypy_cache
+.coverage
+htmlcov/
+logs/
+reports/
+data/
+*.egg-info
+dist/
+build/
+.vscode/
+.idea/
+node_modules/

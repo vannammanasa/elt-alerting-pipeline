@@ -1,0 +1,41 @@
+# =============================================================================
+# dbt Project Configuration
+# =============================================================================
+# Project : Severity-Based Alerting in ELT Pipelines
+# Author  : Manasa Vannam
+# =============================================================================
+
+name: 'elt_alerting_pipeline'
+version: '1.0.0'
+config-version: 2
+profile: 'elt_alerting_pipeline'
+
+# ── Model paths ──────────────────────────────────────────────────────────────
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+analysis-paths: ["analyses"]
+seed-paths: ["seeds"]
+snapshot-paths: ["snapshots"]
+
+# ── Target paths ─────────────────────────────────────────────────────────────
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# ── Model materialisation strategy ──────────────────────────────────────────
+# Staging:      views   (lightweight, always fresh from raw)
+# Intermediate: views   (derived logic, no storage cost)
+# Marts:        tables  (materialised for analytical queries)
+models:
+  elt_alerting_pipeline:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table
+      +schema: transformed

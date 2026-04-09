@@ -1,0 +1,4 @@
+transaction_id,event_timestamp,customer_id,product_id,product_category,quantity,unit_price,payment_method,order_status,shipping_country,customer_email,is_returning_customer,total_amount,unexpected_column
+6310fde6-8b6c-9344-382d-2b30d3c8ffe0,2025-03-03 11:43:42.390185+00:00,88023,428,home,9,477.41,credit_card,completed,DE,user11158@example.com,False,4296.69,injected_value
+6de68961-376d-0b12-5943-5b070b004446,2025-03-03 15:47:57.212135+00:00,48273,121,clothing,1,212.52,paypal,shipped,US,user52375@sample.org,True,212.52,injected_value
+0c0e00da-99c9-c0f5-7ce1-3176c363a9c6,2025-03-03 23:10:18.167331+00:00,98491,150,sports,4,720.98,bank_transfer,completed,IT,user23659@test.co.uk,False,2883.92,injected_value

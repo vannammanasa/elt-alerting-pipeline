@@ -1,0 +1,84 @@
+# =============================================================================
+# Intermediate Model Schema Documentation (AI-5a)
+# =============================================================================
+
+version: 2
+
+models:
+  - name: int_transactions_enriched
+    description: >
+      Enriched transaction records with derived business columns:
+      revenue_band, order_age_days, is_high_value, is_domestic,
+      is_completed.  Serves as the primary input for all mart models.
+    columns:
+      - name: transaction_id
+        description: "Primary key (UUID), inherited from staging."
+      - name: event_timestamp
+        description: "Transaction timestamp (UTC)."
+      - name: customer_id
+        description: "Customer account number."
+      - name: customer_email
+        description: "Customer email (nullable)."
+      - name: is_returning_customer
+        description: "Returning customer flag."
+      - name: product_id
+        description: "Product catalogue ID."
+      - name: product_category
+        description: "Product department."
+      - name: quantity
+        description: "Units purchased."
+      - name: unit_price
+        description: "Unit price in GBP."
+      - name: total_amount
+        description: "Line total."
+      - name: payment_method
+        description: "Payment instrument."
+      - name: order_status
+        description: "Order state."
+      - name: shipping_country
+        description: "ISO country code (nullable)."
+      - name: revenue_band
+        description: "Derived: low (<£20), medium (<£100), high (<£500), premium (≥£500)."
+      - name: order_age_days
+        description: "Derived: days elapsed since event_timestamp."
+      - name: is_high_value
+        description: "Derived: true if total_amount > £100."
+      - name: is_domestic
+        description: "Derived: true if shipping_country = 'GB'."
+      - name: is_completed
+        description: "Derived: true if order_status = 'completed'."
+
+  - name: int_daily_sales
+    description: >
+      Daily aggregation of transaction metrics.  Key target for
+      volume anomaly detection — a sudden drop in transaction_count
+      triggers a critical alert under the severity classification.
+    columns:
+      - name: sale_date
+        description: "Calendar date (primary grain)."
+      - name: transaction_count
+        description: "Total transactions on this date."
+      - name: unique_customers
+        description: "Distinct customer count."
+      - name: total_units_sold
+        description: "Sum of quantity across all orders."
+      - name: daily_revenue
+        description: "Sum of total_amount for the day."
+      - name: avg_order_value
+        description: "Mean total_amount."
+      - name: min_order_value
+        description: "Smallest order on the day."
+      - name: max_order_value
+        description: "Largest order on the day."
+      - name: completed_orders
+        description: "Count of orders with status = completed."
+      - name: cancelled_orders
+        description: "Count of orders with status = cancelled."
+      - name: high_value_orders
+        description: "Count of orders where total_amount > £100."
+      - name: returning_customer_orders
+        description: "Count of orders from returning customers."
+      - name: top_category
+        description: "Most frequent product_category by count."
+      - name: shipping_country_null_rate
+        description: "Proportion of records with null shipping_country."

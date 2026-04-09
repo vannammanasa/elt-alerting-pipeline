@@ -1,0 +1,85 @@
+{
+  "record_count": 10000,
+  "column_count": 13,
+  "seed": 42,
+  "columns": {
+    "transaction_id": {
+      "dtype": "str",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 10000
+    },
+    "event_timestamp": {
+      "dtype": "datetime64[us, UTC]",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 10000
+    },
+    "customer_id": {
+      "dtype": "int64",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 9537
+    },
+    "product_id": {
+      "dtype": "int64",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 500
+    },
+    "product_category": {
+      "dtype": "str",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 5
+    },
+    "quantity": {
+      "dtype": "int64",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 10
+    },
+    "unit_price": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 7656
+    },
+    "payment_method": {
+      "dtype": "str",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 4
+    },
+    "order_status": {
+      "dtype": "str",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 5
+    },
+    "shipping_country": {
+      "dtype": "str",
+      "null_count": 204,
+      "null_rate": 0.0204,
+      "unique_count": 8
+    },
+    "customer_email": {
+      "dtype": "str",
+      "null_count": 221,
+      "null_rate": 0.0221,
+      "unique_count": 9680
+    },
+    "is_returning_customer": {
+      "dtype": "bool",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 2
+    },
+    "total_amount": {
+      "dtype": "float64",
+      "null_count": 0,
+      "null_rate": 0.0,
+      "unique_count": 7965
+    }
+  }
+}
