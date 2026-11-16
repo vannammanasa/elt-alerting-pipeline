@@ -114,18 +114,18 @@ two severity categories:
 | Warning | 13 | `severity: warn` | Logged to observability DB only |
 
 **Test categories covered:**
-- `not_null` — null value validation on required fields
-- `unique` — duplicate detection on primary key fields
-- `accepted_values` — categorical field validation
-- `row_count` — volume threshold checks
-- `freshness` — data arrival timeliness checks
-- Custom macros — schema integrity and distribution checks
+- `not_null` - null value validation on required fields
+- `unique` - duplicate detection on primary key fields
+- `accepted_values` - categorical field validation
+- `row_count` - volume threshold checks
+- `freshness` - data arrival timeliness checks
+- Custom macros - schema integrity and distribution checks
 
 ---
 ## Failure Injection Scenarios
 
-Nine controlled failure scenarios were executed (one planned scenario — 
-schema column drop — was excluded due to downstream dependency constraints):
+Nine controlled failure scenarios were executed (one planned scenario - 
+schema column drop - was excluded due to downstream dependency constraints):
 
 | Scenario | Failure Type | Severity | Target | Rows Affected |
 |---|---|---|---|---|
