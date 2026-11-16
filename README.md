@@ -1,4 +1,4 @@
-## ELT Alerting Pipeline — Experimental Implementation and System Architecture
+## ELT Alerting Pipeline - Experimental Implementation and System Architecture
 
 **Project:** An Empirical Evaluation of Severity-Based Alerting in ELT Pipelines: Minimising Alert Fatigue Without Compromising Detection.
 
