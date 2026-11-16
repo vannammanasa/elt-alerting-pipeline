@@ -3,14 +3,14 @@
 **Project:** An Empirical Evaluation of Severity-Based Alerting in ELT Pipelines: Minimising Alert Fatigue Without Compromising Detection.
 
 **Author:** Manasa Vannam (S2471596)  
-**Programme:** MSc Computer Science — Glasgow Caledonian University(London)
+**Programme:** MSc Computer Science - Glasgow Caledonian University(London)
 
 ---
 ## Project Overview
 This repository contains the practical implementation of the dissertation project on severity-based alerting in ELT pipelines. The system was developed to support a controlled experimental comparison between two alerting strategies:
 
-Baseline alerting — all detected failures generate email alerts
-Severity-based alerting — only critical failures generate email alerts, while warning-level events are logged to the observability database
+Baseline alerting - all detected failures generate email alerts
+Severity-based alerting - only critical failures generate email alerts, while warning-level events are logged to the observability database
 
 The implementation supports the empirical evaluation presented in the dissertation by enabling reproducible failure injection, structured monitoring, alert routing, and metric collection
 
@@ -25,9 +25,9 @@ This practical implementation directly supports the methodology and results chap
 - comparison of baseline and severity-based alerting strategies
 - storage of execution logs and alert records in an observability database
 - computation of the three core evaluation metrics:
-   - **Alert volume** — total email notifications per run
-   - **Mean Time to Detect (MTTD)** — time from failure to alert delivery
-   - **Actionable alert ratio** — proportion of critical alerts among all alerts
+   - **Alert volume** - total email notifications per run
+   - **Mean Time to Detect (MTTD)** - time from failure to alert delivery
+   - **Actionable alert ratio** - proportion of critical alerts among all alerts
 
 **Key experimental result:** The severity-based strategy achieved a 28.9% 
 reduction in email alert volume (45 → 32 emails) whilst maintaining 
@@ -64,8 +64,8 @@ This environment provisions the complete infrastructure required for the ELT ale
 
 | Schema | Layer | Contents |
 |---|---|---|
-| `raw` | Ingestion | `raw_transactions` — 10,000 synthetic e-commerce records |
-| `staging` | Staging | `stg_transactions` — cleaned and validated view |
+| `raw` | Ingestion | `raw_transactions` - 10,000 synthetic e-commerce records |
+| `staging` | Staging | `stg_transactions` - cleaned and validated view |
 | `transformed` | Mart | `mart_transactions`, `mart_customer_summary`, `mart_daily_summary` |
 | `quality` | Validation | dbt test results and quality check outputs |
 
@@ -129,15 +129,15 @@ schema column drop — was excluded due to downstream dependency constraints):
 
 | Scenario | Failure Type | Severity | Target | Rows Affected |
 |---|---|---|---|---|
-| S1 | NULL_PK — null primary key | Critical | transaction_id | 50 |
-| S2 | NULL_MINOR — null non-essential column | Warning | shipping_country | 500 |
-| S3 | SCHEMA_DRIFT — unexpected column added | Critical | unexpected_col | 0 (col added) |
-| S4 | VOLUME_ANOMALY — 60% row deletion | Critical | raw_transactions | ~6,000 |
-| S5 | FRESHNESS_DELAY — 48hr timestamp backdating | Warning | all timestamps | 4,000 |
-| S6 | DUPLICATE — duplicate row injection | Warning | raw_transactions | 200 |
-| S7 | MIXED_CRITICAL — NULL PK + volume drop | Critical | Multiple | 50 + ~6,000 |
-| S8 | MIXED_WARNING — nulls + duplicates + freshness | Warning | Multiple | 500 + 200 + 4,000 |
-| S9 | MIXED_BOTH — critical + warning combined | Both | Multiple | Combined |
+| S1 | NULL_PK - null primary key | Critical | transaction_id | 50 |
+| S2 | NULL_MINOR - null non-essential column | Warning | shipping_country | 500 |
+| S3 | SCHEMA_DRIFT - unexpected column added | Critical | unexpected_col | 0 (col added) |
+| S4 | VOLUME_ANOMALY - 60% row deletion | Critical | raw_transactions | ~6,000 |
+| S5 | FRESHNESS_DELAY - 48hr timestamp backdating | Warning | all timestamps | 4,000 |
+| S6 | DUPLICATE - duplicate row injection | Warning | raw_transactions | 200 |
+| S7 | MIXED_CRITICAL - NULL PK + volume drop | Critical | Multiple | 50 + ~6,000 |
+| S8 | MIXED_WARNING - nulls + duplicates + freshness | Warning | Multiple | 500 + 200 + 4,000 |
+| S9 | MIXED_BOTH - critical + warning combined | Both | Multiple | Combined |
 
 ---
 
@@ -210,12 +210,12 @@ make report
 
 | Dissertation Specification | Docker Implementation |
 |---|---|
-| Python — Core pipeline logic | `pipeline` container with Python 3.11 |
-| PostgreSQL — Data layers & observability | `postgres` service (3 databases) |
-| dbt — Transformation & quality validation | Installed in `pipeline` container via `dbt-core` + `dbt-postgres` |
-| Apache Airflow — Scheduling & orchestration | `airflow-web` + `airflow-sched` services |
-| SMTP + structured logging — Alerting | Gmail SMTP (`smtp.gmail.com:587` TLS) + `python-json-logger` / `structlog` |
-| Git — Version control | `.gitignore` included; ready for repository initialisation |
+| Python - Core pipeline logic | `pipeline` container with Python 3.11 |
+| PostgreSQL - Data layers & observability | `postgres` service (3 databases) |
+| dbt - Transformation & quality validation | Installed in `pipeline` container via `dbt-core` + `dbt-postgres` |
+| Apache Airflow - Scheduling & orchestration | `airflow-web` + `airflow-sched` services |
+| SMTP + structured logging - Alerting | Gmail SMTP (`smtp.gmail.com:587` TLS) + `python-json-logger` / `structlog` |
+| Git - Version control | `.gitignore` included; ready for repository initialisation |
 
 ## Experiment Modes
 - Baseline Mode
@@ -284,7 +284,7 @@ make report      # Generate experiment comparison report
 | Issue | Impact | Workaround |
 |---|---|---|
 | Airflow DAG validation step fails due to environment path configuration | Full end-to-end automation not achieved | Run pipeline stages manually using `make` commands as documented in Quick Start |
-| Observability schema alignment — `execution_id` and `alerting_mode` fields missing in some runs | Partial automated metrics tracking | Metrics computed manually from `alerts` and `injected_failures` tables |
+| Observability schema alignment - `execution_id` and `alerting_mode` fields missing in some runs | Partial automated metrics tracking | Metrics computed manually from `alerts` and `injected_failures` tables |
 | Schema column drop scenario (S4 original design) excluded due to downstream dependency failures | 9 of 10 planned scenarios executed | All 9 executed scenarios cover the full range of critical and warning failure types |
 
 > **Note:** These discrepancies did not affect the core comparative results. Both alerting strategies were evaluated under identical conditions across all 9 successfully executed scenarios.
@@ -297,12 +297,12 @@ make report      # Generate experiment comparison report
 This project was designed to support controlled and repeatable 
 experimentation. Reproducibility is ensured through:
 
-- Containerised infrastructure using Docker Compose — identical runtime across all runs
-- Fixed random seed (42) — deterministic synthetic dataset generation
-- Explicit failure injection scenarios — consistent fault conditions
-- Structured observability logging — full traceability of all events
-- Deterministic severity classification — rule-based, not probabilistic
-- Version-controlled configuration — all parameters committed to Git
+- Containerised infrastructure using Docker Compose - identical runtime across all runs
+- Fixed random seed (42) - deterministic synthetic dataset generation
+- Explicit failure injection scenarios - consistent fault conditions
+- Structured observability logging - full traceability of all events
+- Deterministic severity classification - rule-based, not probabilistic
+- Version-controlled configuration - all parameters committed to Git
 
 ## Expected Outputs
 
