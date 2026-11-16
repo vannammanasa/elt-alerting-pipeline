@@ -46,8 +46,8 @@ This environment provisions the complete infrastructure required for the ELT ale
 |---|---|---|---|
 | **postgres** | `postgres:16` | `5432` | Data warehouse, observability store, Airflow metadata |
 | **airflow-web** | `apache/airflow:2.10.4` | `8080` | Airflow web UI for DAG management |
-| **airflow-sched** | `apache/airflow:2.10.4` | — | Airflow scheduler for triggering DAG runs |
-| **pipeline** | Custom (Dockerfile) | — | Core ELT pipeline logic, dbt execution, failure injection, and alerting |
+| **airflow-sched** | `apache/airflow:2.10.4` | - | Airflow scheduler for triggering DAG runs |
+| **pipeline** | Custom (Dockerfile) | - | Core ELT pipeline logic, dbt execution, failure injection, and alerting |
 
 
 ### PostgreSQL Databases
