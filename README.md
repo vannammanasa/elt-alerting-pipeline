@@ -244,5 +244,5 @@ The synthetic dataset uses a fixed random seed, and controlled failure injection
 **Manasa Vannam**
 
 🎓 MSc Computer Science  
-💻 Software Development | Data & Analytics | Automation
+💻 Data Engineering
 
