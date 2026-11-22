@@ -1,320 +1,248 @@
-## ELT Alerting Pipeline - Experimental Implementation and System Architecture
+# 🚀 ELT Pipeline with Severity-Based Alerting
 
-**Project:** An Empirical Evaluation of Severity-Based Alerting in ELT Pipelines: Minimising Alert Fatigue Without Compromising Detection.
+### 🔍 An Empirical Evaluation of Severity-Based Alerting in ELT Pipelines: Minimising Alert Fatigue Without Compromising Detection
 
-**Author:** Manasa Vannam (S2471596)  
-**Programme:** MSc Computer Science - Glasgow Caledonian University(London)
+A reproducible ELT pipeline exploring how severity-based alerting can reduce unnecessary email notifications while ensuring critical data quality failures are detected promptly.
 
----
-## Project Overview
-This repository contains the practical implementation of the dissertation project on severity-based alerting in ELT pipelines. The system was developed to support a controlled experimental comparison between two alerting strategies:
-
-Baseline alerting - all detected failures generate email alerts
-Severity-based alerting - only critical failures generate email alerts, while warning-level events are logged to the observability database
-
-The implementation supports the empirical evaluation presented in the dissertation by enabling reproducible failure injection, structured monitoring, alert routing, and metric collection
+👩‍💻 **Author:** Manasa Vannam  
+🎓 **Programme:** MSc Computer Science, Glasgow Caledonian University  
+📌 **Project Type:** MSc Dissertation
 
 ---
 
-## Dissertation Alignment
+## 📖 About the Project
 
-This practical implementation directly supports the methodology and results chapters of the dissertation. In particular, it enables:
+This project evaluates two alerting approaches in an ELT pipeline:
 
-- reproducible ELT pipeline execution in a containerised environment
-- controlled injection of representative pipeline failures(9 scenarios)
-- comparison of baseline and severity-based alerting strategies
-- storage of execution logs and alert records in an observability database
-- computation of the three core evaluation metrics:
-   - **Alert volume** - total email notifications per run
-   - **Mean Time to Detect (MTTD)** - time from failure to alert delivery
-   - **Actionable alert ratio** - proportion of critical alerts among all alerts
+- 📧 **Baseline Alerting:** All detected data quality failures generate email notifications.
+- 🚨 **Severity-Based Alerting:** Critical failures generate email notifications, while warnings are recorded in an observability database.
 
-**Key experimental result:** The severity-based strategy achieved a 28.9% 
-reduction in email alert volume (45 → 32 emails) whilst maintaining 
-immediate MTTD for all critical failures and improving the actionable 
-alert ratio from 71.1% to 100%.
+The system combines synthetic e-commerce data, automated data quality testing, controlled failure injection and structured monitoring to compare both approaches under repeatable experimental conditions.
 
----
+## 📊 Key Results
 
-## Architecture Overview
+| Metric | Result |
+|---|---:|
+| 📧 Baseline email alerts | 45 |
+| 🚨 Severity-based email alerts | 32 |
+| 📉 Reduction in email alerts | **28.9%** |
+| 🎯 Baseline actionable alert ratio | 71.1% |
+| ✅ Severity-based actionable alert ratio | **100%** |
+| 🔍 Critical failures detected | **All 32** |
 
-This environment provisions the complete infrastructure required for the ELT alerting pipeline experiments. All services are orchestrated through `docker-compose.yml` and can be managed through the `Makefile`.
+**Key finding:** Severity-based alerting reduced email notifications by 28.9% while maintaining immediate detection of all critical failures in the experiments.
 
-### Services
+## 🏗️ System Architecture
 
-| Service | Image | Port | Purpose |
-|---|---|---|---|
-| **postgres** | `postgres:16` | `5432` | Data warehouse, observability store, Airflow metadata |
-| **airflow-web** | `apache/airflow:2.10.4` | `8080` | Airflow web UI for DAG management |
-| **airflow-sched** | `apache/airflow:2.10.4` | - | Airflow scheduler for triggering DAG runs |
-| **pipeline** | Custom (Dockerfile) | - | Core ELT pipeline logic, dbt execution, failure injection, and alerting |
+The project uses a containerised architecture with the following components:
 
+1. 🛒 **Synthetic Data Generation** - Creates 10,000 e-commerce transaction records.
+2. 🗄️ **PostgreSQL** - Stores raw, staging, transformed and quality-related data.
+3. 🔄 **dbt** - Runs SQL transformations and data quality tests.
+4. ⚙️ **Apache Airflow** - Provides workflow orchestration.
+5. 🚨 **Alerting Logic** - Routes notifications according to failure severity.
+6. 📈 **Observability Database** - Stores pipeline executions, injected failures, alerts, quality results and experiment metrics.
+7. 📑 **Reporting** - Supports comparison of baseline and severity-based alerting results.
 
-### PostgreSQL Databases
+## 🛠️ Technology Stack
 
-| Database | Owner | Purpose |
-|---|---|---|
-| `elt_warehouse` | `pipeline_user` | Raw → Staging → Transformed data layers |
-| `observability` | `pipeline_user` | Execution logs, alert records, experiment metrics |
-| `airflow_metadata` | `airflow` | Airflow internal state |
+- 🐍 **Programming:** Python 3.11, SQL
+- 🗄️ **Database:** PostgreSQL 16
+- 🔄 **Data Transformation:** dbt
+- ⚙️ **Workflow Orchestration:** Apache Airflow 2.10.4
+- 🐳 **Infrastructure:** Docker, Docker Compose
+- 📧 **Alerting:** SMTP email and database logging
+- 🧪 **Testing:** dbt tests and controlled failure injection
 
----
+## 🛒 Dataset
 
-### Warehouse Schema Layers
+The pipeline uses a synthetic e-commerce dataset containing **10,000 transaction records** and 13 columns.
 
-| Schema | Layer | Contents |
-|---|---|---|
-| `raw` | Ingestion | `raw_transactions` - 10,000 synthetic e-commerce records |
-| `staging` | Staging | `stg_transactions` - cleaned and validated view |
-| `transformed` | Mart | `mart_transactions`, `mart_customer_summary`, `mart_daily_summary` |
-| `quality` | Validation | dbt test results and quality check outputs |
+Dataset fields include:
 
----
+- Transaction identifiers and timestamps
+- Customer and product information
+- Quantities and prices
+- Payment methods and order status
+- Shipping details
 
-## Observability Tables
+🔁 A fixed random seed is used to support reproducibility.
 
-The observability database stores the experimental records used for analysis:
+## 🧪 Data Quality Testing
 
-| Table | Purpose |
-|---|---|
-| `pipeline_executions` | Execution timestamps, status, and pipeline metadata |
-| `injected_failures` | Failure type, severity, affected rows, injection timestamp |
-| `alerts` | Alert timestamp, severity, delivery channel (email/log), delivery status |
-| `quality_check_results` | dbt test outcomes (pass/fail/warn) and severity configuration |
-| `experiment_metrics` | Computed metrics: alert volume, MTTD, actionable alert ratio |
+The project implements **45 dbt tests**:
 
----
-## Synthetic Dataset
+- 🔴 32 critical-severity tests configured with `error`.
+- 🟡 13 warning-severity tests configured with `warn`.
 
-The pipeline ingests a programmatically generated synthetic e-commerce 
-transaction dataset with the following characteristics:
+Test coverage includes:
 
-| Attribute | Value |
-|---|---|
-| Total records | 10,000 |
-| Columns | 13 |
-| Random seed | 42 (fixed for reproducibility) |
-| Primary key | `transaction_id` (UUID) |
-| Timestamp field | `event_timestamp` (UTC) |
-| Key fields | `customer_id`, `product_id`, `product_category`, `quantity`, `unit_price`, `total_amount`, `payment_method`, `order_status`, `shipping_country`, `customer_email`, `is_returning_customer` |
-| Storage location | `raw.raw_transactions` |
+- Not-null constraints
+- Uniqueness
+- Accepted values
+- Row-count validation
+- Data freshness
+- Custom SQL-based checks
 
-The fixed random seed (42) ensures that every experimental run operates 
-on an identical dataset, supporting full reproducibility.
+## 🔬 Experimental Evaluation
 
----
-## dbt Quality Testing Framework
+The project uses controlled failure injection to compare the two alerting strategies.
 
-45 dbt tests are executed across staging and mart layers, classified into 
-two severity categories:
+**Nine failure scenario types** were executed across the experimental evaluation. One additional planned schema-change scenario was excluded because of downstream dependency constraints.
 
-| Severity | Count | dbt Config | Alert Action |
-|---|---|---|---|
-| Critical | 32 | `severity: error` | Immediate email notification |
-| Warning | 13 | `severity: warn` | Logged to observability DB only |
+The evaluation considers:
 
-**Test categories covered:**
-- `not_null` - null value validation on required fields
-- `unique` - duplicate detection on primary key fields
-- `accepted_values` - categorical field validation
-- `row_count` - volume threshold checks
-- `freshness` - data arrival timeliness checks
-- Custom macros - schema integrity and distribution checks
+- 📊 **Alert Volume:** Number of email notifications generated.
+- ⏱️ **Mean Time to Detect (MTTD):** Time taken to detect failures.
+- 🎯 **Actionable Alert Ratio:** Proportion of notifications representing critical, actionable failures.
 
----
-## Failure Injection Scenarios
+The same pipeline and failure conditions were used to support a consistent comparison between alerting approaches.
 
-Nine controlled failure scenarios were executed (one planned scenario - 
-schema column drop - was excluded due to downstream dependency constraints):
+## 📁 Project Structure
 
-| Scenario | Failure Type | Severity | Target | Rows Affected |
-|---|---|---|---|---|
-| S1 | NULL_PK - null primary key | Critical | transaction_id | 50 |
-| S2 | NULL_MINOR - null non-essential column | Warning | shipping_country | 500 |
-| S3 | SCHEMA_DRIFT - unexpected column added | Critical | unexpected_col | 0 (col added) |
-| S4 | VOLUME_ANOMALY - 60% row deletion | Critical | raw_transactions | ~6,000 |
-| S5 | FRESHNESS_DELAY - 48hr timestamp backdating | Warning | all timestamps | 4,000 |
-| S6 | DUPLICATE - duplicate row injection | Warning | raw_transactions | 200 |
-| S7 | MIXED_CRITICAL - NULL PK + volume drop | Critical | Multiple | 50 + ~6,000 |
-| S8 | MIXED_WARNING - nulls + duplicates + freshness | Warning | Multiple | 500 + 200 + 4,000 |
-| S9 | MIXED_BOTH - critical + warning combined | Both | Multiple | Combined |
+```text
+elt-alerting-pipeline/
+│
+├── config/
+├── dags/
+├── plugins/
+├── dbt_project/
+├── src/
+├── tests/
+├── data/                  # Generated data; not committed
+├── logs/                  # Runtime logs; not committed
+├── reports/               # Generated reports; not committed
+│
+├── docker-compose.yml
+├── Dockerfile
+├── Makefile
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── README.md
+```
 
----
+## 🚀 Getting Started
 
-## Prerequisites
+### 📋 Prerequisites
 
-- **Docker Desktop** ≥ 4.x (includes Docker Engine and Docker Compose)
-- **Docker Compose** ≥ 2.x (V2 syntax — bundled with Docker Desktop)
-- **Git** ≥ 2.x for version control
-- **Gmail Account** with 2-Step Verification enabled and App Password generated
-- ~4 GB free RAM (Airflow + PostgreSQL)
-- ~2 GB free disk space
+- 🐳 Docker Desktop 4.x or later
+- Docker Compose V2
+- Git
+- At least 4 GB available RAM
+- At least 2 GB free disk space
 
----
-
-### Gmail App Password Setup
-
-1. Go to `myaccount.google.com` → Security → 2-Step Verification
-2. Navigate to `myaccount.google.com/apppasswords`
-3. Select Mail as the app, enter "ELT Pipeline" as the name
-4. Copy the 16-character App Password for use in `.env`
-
-> **WARNING:** Never use your regular Gmail password. Use only the App Password.
-
----
-
-## Security Note
-
-The .env file is intended for local development only. Before sharing this project, replace all real credentials with placeholder values. Do not distribute personal Gmail app passwords or other sensitive configuration values.
-
-Example:
-
-GMAIL_ADDRESS=your_email@gmail.com
-GMAIL_APP_PASSWORD=your_app_password
-ALERT_RECIPIENT_EMAIL=recipient_email@gmail.com
-
----
-
-## Quick Start
+### 1️⃣ Clone the Repository
 
 ```bash
-# 1. Clone the repository & Enter the project folder(cd elt-alerting-pipeline)
-git clone <repository-url>
+git clone <YOUR_REPOSITORY_URL>
 cd elt-alerting-pipeline
+```
 
-# 2. Start all services
+### 2️⃣ Configure Environment Variables
+
+Create your local `.env` file using the example configuration:
+
+```bash
+cp .env.example .env
+```
+
+Update the required values in `.env` before running the pipeline.
+
+🔐 **Security Note:** The `.env` file may contain credentials and must not be committed to GitHub. Use placeholder values in `.env.example` and keep real credentials private.
+
+### 3️⃣ Start the Services
+
+```bash
 make up
+```
 
-# 3. Verify services are healthy
-make status
+Check the running containers:
 
-# 4. Access the UIs
-#    Airflow  → http://localhost:8080  (admin / admin)
+```bash
+docker compose ps
+```
 
-# 5. Run dbt to verify database connectivity
-make dbt-debug
+### 4️⃣ Access Airflow
 
-# 6. Run the baseline experiment
+Open the following address in your browser:
+
+```text
+http://localhost:8080
+```
+
+Use the local development credentials configured for your environment.
+
+### 5️⃣ Run the Experiments
+
+📧 Run baseline alerting:
+
+```bash
 make baseline
+```
 
-# 7. Run the smart alerting experiment
+🚨 Run severity-based alerting:
+
+```bash
 make smart
+```
 
-# 8. Generate the comparison report
+📊 Generate the experiment report:
+
+```bash
 make report
 ```
 
----
-
-## Technology Mapping
-
-| Dissertation Specification | Docker Implementation |
-|---|---|
-| Python - Core pipeline logic | `pipeline` container with Python 3.11 |
-| PostgreSQL - Data layers & observability | `postgres` service (3 databases) |
-| dbt - Transformation & quality validation | Installed in `pipeline` container via `dbt-core` + `dbt-postgres` |
-| Apache Airflow - Scheduling & orchestration | `airflow-web` + `airflow-sched` services |
-| SMTP + structured logging - Alerting | Gmail SMTP (`smtp.gmail.com:587` TLS) + `python-json-logger` / `structlog` |
-| Git - Version control | `.gitignore` included; ready for repository initialisation |
-
-## Experiment Modes
-- Baseline Mode
-
-All detected test failures generate email alerts. This mode represents uniform alerting and serves as the control condition for comparison.
-
-- Smart Mode
-
-Only critical failures generate email alerts. Warning-level failures are written to the observability database without sending email notifications. This mode represents the proposed severity-based alerting strategy.
-
----
-
-## Key Commands
+### 6️⃣ Stop the Services
 
 ```bash
-make up          # Start all services
-make down        # Stop all services
-make build       # Rebuild the pipeline image
-make clean       # Remove all volumes and containers
-make baseline    # Run baseline experiment
-make smart       # Run smart alerting experiment
-make dbt-run     # Execute dbt models
-make dbt-test    # Execute dbt tests
-make psql        # Open psql to the warehouse
-make psql-obs    # Open psql to the observability DB
-make test        # Run Python unit tests
-make report      # Generate experiment comparison report
+make down
 ```
+
+## ⌨️ Useful Make Commands
+
+| Command | Description |
+|---|---|
+| `make up` | 🚀 Start Docker services |
+| `make down` | 🛑 Stop services |
+| `make build` | 🏗️ Build project containers |
+| `make clean` | 🧹 Clean generated resources |
+| `make baseline` | 📧 Run baseline alerting |
+| `make smart` | 🚨 Run severity-based alerting |
+| `make dbt-run` | 🔄 Execute dbt transformations |
+| `make dbt-test` | 🧪 Run data quality tests |
+| `make psql` | 🗄️ Access warehouse database |
+| `make psql-obs` | 📈 Access observability database |
+| `make test` | ✅ Run project tests |
+| `make report` | 📑 Generate experiment report |
+
+## ⚠️ Implementation Notes and Limitations
+
+- The full Airflow DAG automation was not achieved because of a DAG validation and path issue. The pipeline can be executed through the provided Makefile commands.
+- Some observability records required manual handling because certain execution metadata fields were not consistently populated.
+- One planned schema-change failure scenario was excluded due to downstream dependency constraints.
+
+These limitations are documented to make the experimental implementation and its boundaries transparent.
+
+## 🔁 Reproducibility
+
+The project includes Docker configuration, dependency definitions, SQL transformations, test definitions and Makefile commands to support repeatable execution.
+
+The synthetic dataset uses a fixed random seed, and controlled failure injection allows the alerting approaches to be evaluated under consistent conditions.
+
+## 🔮 Future Improvements
+
+- ⚙️ Complete end-to-end Airflow DAG orchestration.
+- 📈 Improve automated experiment metadata collection.
+- 🧪 Extend the range of schema-change failure scenarios.
+- 📊 Add richer monitoring dashboards and experiment visualisations.
 
 ---
 
-## Directory Structure
+## 👩‍💻 Author
 
-```
-.
-├── Dockerfile                  # Pipeline application image
-├── docker-compose.yml          # Service orchestration
-├── Makefile                    # Convenience commands
-├── requirements.txt            # Python dependencies
-├── .env                        # Environment variables (dev only)
-├── README.md
-├── .dockerignore
-├── .gitignore
-├── config/
-│   ├── init-databases.sql      # PostgreSQL database initialisation
-│   ├── init-schemas.sql        # Schema & table creation
-│   └── msmtprc                 # SMTP client configuration
-├── dags/                       # Airflow DAG definitions
-├── plugins/
-├── dbt_project/
-│   ├── dbt_project.yml         # dbt project configuration
-│   ├── profiles.yml            # dbt connection profile
-│   ├── models/                 # dbt SQL models
-│   ├── tests/                  # dbt data quality tests
-│   ├── macros/                 # dbt macros
-│   └── seeds/                  # dbt seed data
-├── src/                        # Python application source code
-├── tests/                      # Python unit & integration tests
-├── logs/                       # Runtime logs (gitignored)
-├── reports/                    # Generated experiment reports (gitignored)
-└── data/                       # Raw data files (gitignored)
-```
----
-## Known Issues and Workarounds
+**Manasa Vannam**
 
-| Issue | Impact | Workaround |
-|---|---|---|
-| Airflow DAG validation step fails due to environment path configuration | Full end-to-end automation not achieved | Run pipeline stages manually using `make` commands as documented in Quick Start |
-| Observability schema alignment - `execution_id` and `alerting_mode` fields missing in some runs | Partial automated metrics tracking | Metrics computed manually from `alerts` and `injected_failures` tables |
-| Schema column drop scenario (S4 original design) excluded due to downstream dependency failures | 9 of 10 planned scenarios executed | All 9 executed scenarios cover the full range of critical and warning failure types |
+🎓 MSc Computer Science  
+💻 Software Development | Data & Analytics | Automation
 
-> **Note:** These discrepancies did not affect the core comparative results. Both alerting strategies were evaluated under identical conditions across all 9 successfully executed scenarios.
-
----
-
-## Reproducibility
-
-
-This project was designed to support controlled and repeatable 
-experimentation. Reproducibility is ensured through:
-
-- Containerised infrastructure using Docker Compose - identical runtime across all runs
-- Fixed random seed (42) - deterministic synthetic dataset generation
-- Explicit failure injection scenarios - consistent fault conditions
-- Structured observability logging - full traceability of all events
-- Deterministic severity classification - rule-based, not probabilistic
-- Version-controlled configuration - all parameters committed to Git
-
-## Expected Outputs
-
-After a complete experimental run, the system produces:
-
-
-| Output | Location | Description |
-|---|---|---|
-| Pipeline execution records | `observability.pipeline_executions` | Timestamps and status for each run |
-| Injected failure records | `observability.injected_failures` | All 9 scenarios with metadata |
-| Alert records | `observability.alerts` | All email and log alerts with timestamps |
-| Quality test results | `observability.quality_check_results` | dbt test outcomes per run |
-| Experiment metrics | `observability.experiment_metrics` | Alert volume, MTTD, actionable ratio |
-| Email notifications | Gmail inbox | CRITICAL alerts with severity and metadata |
-| Comparison report | `reports/` | Summary of baseline vs smart performance |
